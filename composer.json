@@ -1,0 +1,19 @@
+{
+    "name": "karo0420/api-mapper",
+    "description": "One Stop Shop of api mapping",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Karo0420\\ApiMapper\\": "src/Codes"
+        }
+    },
+    "authors": [
+        {
+            "name": "karo0420",
+            "email": "soleimanian.h2o@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.4"
+    }
+}
