@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 
 trait Remotable
 {
-    protected function load(string $verb, string $url, array $headers = [], array $payload)
+    protected function load(string $verb, string $url, array $headers = [], array $payload = [])
     {
         $client = new Client();
         $response = $client->request($verb, $url, [
