@@ -7,23 +7,11 @@ class ProductParser extends \Karo0420\ApiMapper\ProductParser
 
     protected function neededKeys(): array
     {
-        return [
-            'id',
-            'title',
-            'price',
-            'description',
-            'category',
-            'image' => 'ax',
-            'rating' => [
-                'rate',
-                'count'
-            ]
-        ];
+        // TODO: Implement neededKeys() method.
     }
 
     protected function collectionNeededKeys(): array
     {
-        return [];
+        // TODO: Implement collectionNeededKeys() method.
     }
-
 }

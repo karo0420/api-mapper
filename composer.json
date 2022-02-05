@@ -4,7 +4,7 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Karo0420\\ApiMapper\\": "src/Codes"
+            "Karo0420\\ApiMapper\\": "src"
         }
     },
     "authors": [

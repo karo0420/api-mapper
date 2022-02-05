@@ -15,13 +15,12 @@ abstract class BaseShop
 
     abstract protected function prepareRoutes(): array;
 
-    public function __construct(protected ProductLoader $product, protected CategoryLoader $category, protected array $config)
+    public function __construct(protected ProductLoader $product, protected array $config)
     {
         $this->routes = $this->prepareRoutes();
         $this->shopName = $this->config['shop_name'];
         $this->shopId   = $this->config['shop_id'];
         $this->product->setShop($this);
-        $this->category->setShop($this);
     }
 
     public function products()
