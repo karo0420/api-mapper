@@ -9,4 +9,5 @@ interface ItemInterface
     public function getItems(): array;
 
     public function additional(array $data): ItemInterface;
+
 }

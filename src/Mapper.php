@@ -18,19 +18,21 @@ abstract class Mapper
 
     public function parse(string $productData)
     {
+        $productArray = $this->convertToArray($productData);
+        if (! $productArray)
+            return null;
         if ($this->isCollection) {
-            $result = $this->parseCollection($productData);
+            $result = $this->parseCollection($productArray);
         }else {
-            $product = $this->convertToArray($productData);
-            $result = $this->syncProductKeys($product, new Item(), $this->neededKeys());
+            $result = $this->syncProductKeys($productArray, new Item(), $this->neededKeys());
         }
         return $result;
     }
 
-    public function parseCollection(string $productData)
+    public function parseCollection(array $productData)
     {
         //print_r($productData);
-        $productsArray = $this->convertToArray($productData);
+        $productsArray = $productData;
         $productGroup = new ItemGroup();
 
         if (count($this->collectionNeededKeys())) {
@@ -40,17 +42,25 @@ abstract class Mapper
                 }
             }
 
-        }else
+        }else {
             foreach ($productsArray as $product)
                 $productGroup->addItem($this->syncProductKeys($product, new Item(), $this->neededKeys()));
+        }
         return $productGroup;
     }
 
-    private function syncProductKeys(array $productArray, $productObj, array $neededKeys): Item
+    private function syncProductKeys(mixed $productArray, $productObj, array $neededKeys): Item
     {
+        if (! empty($productArray) && empty($neededKeys))
+            $neededKeys = ['mapper_item'];
         foreach ($neededKeys as $key => $value) {
             $searchKey = is_numeric($key) ? $value : $key;
-            $data = $productArray[$searchKey]??null;
+            if ($searchKey !== 'mapper_item')
+                $data = $productArray[$searchKey]??null;
+            else {
+                $data = $productArray;
+                $value = $key;
+            }
             if (is_array($value)) {
                 $data = $this->syncProductKeys($data, new Item(), $value);
                 $value = $key;
@@ -60,7 +70,7 @@ abstract class Mapper
         return $productObj;
     }
 
-    private function convertToArray(string $productData): array
+    private function convertToArray(string $productData)
     {
         return json_decode($productData, true);
     }

@@ -16,6 +16,6 @@ class CategoryMapper extends Mapper
 
     protected function collectionNeededKeys(): array
     {
-        // TODO: Implement collectionNeededKeys() method.
+        return [];
     }
 }

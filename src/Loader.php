@@ -55,19 +55,20 @@ class Loader
     /**
      * @throws VisitNonRouteInstance
      */
-    public function visit(Mapper $mapper = null): ItemInterface
+    public function visit(Mapper $mapper = null): ItemInterface|null
     {
         if (! $this->mapRoutes instanceof Route)
             throw new VisitNonRouteInstance('Trying to visit non-route instance , This route has sub routes');
         $mapperModel = $mapper!=null?$mapper:$this->mapRoutes->getMapper();
         $route = $this->mapRoutes->setBaseUrl($this->map->baseUrl());
         //print_r($route->getParams());
-        return $mapperModel->parse($route->visit())
-            ->additional([
+        if ($parsed = $mapperModel->parse($route->visit())) {
+            $parsed->additional([
                 'map_name' => $this->map->mapName,
                 'map_id'   => $this->map->mapId
             ]);
-        ;
+        }
+        return $parsed;
     }
 
 

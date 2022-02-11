@@ -2,6 +2,7 @@
     "name": "karo0420/api-mapper",
     "description": "One Stop Shop of api mapping",
     "type": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Karo0420\\ApiMapper\\": "src"
