@@ -2,12 +2,16 @@
 
 namespace Karo0420\ApiMapper\Shops\Zoodoopi;
 
-class ProductParser extends \Karo0420\ApiMapper\ProductParser
+use Karo0420\ApiMapper\Mapper;
+
+class CategoryMapper extends Mapper
 {
 
     protected function neededKeys(): array
     {
-        // TODO: Implement neededKeys() method.
+        return [
+
+        ];
     }
 
     protected function collectionNeededKeys(): array

@@ -2,47 +2,57 @@
 
 namespace Karo0420\ApiMapper;
 
-abstract class ProductParser
+abstract class Mapper
 {
 
     protected array $productData;
+    private bool $isCollection = false;
+
+
+    public static function collection()
+    {
+        $mapper = new static();
+        $mapper->isCollection = true;
+        return $mapper;
+    }
 
     public function parse(string $productData)
     {
-        $product = $this->convertToArray($productData);
-        $productModel = new Product();
-        return $this->syncProductKeys($product, $productModel, $this->neededKeys());
+        if ($this->isCollection) {
+            $result = $this->parseCollection($productData);
+        }else {
+            $product = $this->convertToArray($productData);
+            $result = $this->syncProductKeys($product, new Item(), $this->neededKeys());
+        }
+        return $result;
     }
 
-    public function parseCollection(string $productData): array
+    public function parseCollection(string $productData)
     {
         //print_r($productData);
         $productsArray = $this->convertToArray($productData);
-        $productObj = new Product();
-        $productStack = [];
+        $productGroup = new ItemGroup();
 
         if (count($this->collectionNeededKeys())) {
             foreach ($this->collectionNeededKeys() as $collectionKeyName => $neededKeys) {
-                //$productStack = [];
                 foreach ($productsArray[$collectionKeyName] as $product) {
-                    $productStack[] = $this->syncProductKeys($product, clone $productObj, $neededKeys);
+                    $productGroup->addItem($this->syncProductKeys($product, new Item(), $neededKeys));
                 }
             }
 
         }else
             foreach ($productsArray as $product)
-                $productStack[] = $this->syncProductKeys($product, clone $productObj, $this->neededKeys());
-        return $productStack;
+                $productGroup->addItem($this->syncProductKeys($product, new Item(), $this->neededKeys()));
+        return $productGroup;
     }
 
-    private function syncProductKeys(array $productArray, $productObj, array $neededKeys): Product
+    private function syncProductKeys(array $productArray, $productObj, array $neededKeys): Item
     {
-        $c = new class extends Product {};
         foreach ($neededKeys as $key => $value) {
             $searchKey = is_numeric($key) ? $value : $key;
-            $data = $productArray[$searchKey];
+            $data = $productArray[$searchKey]??null;
             if (is_array($value)) {
-                $data = $this->syncProductKeys($data, clone $c, $value);
+                $data = $this->syncProductKeys($data, new Item(), $value);
                 $value = $key;
             }
             $productObj->$value = $data;

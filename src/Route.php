@@ -10,36 +10,85 @@ class Route
 
     use Remotable;
 
+    private array $params = [];
+
     private array $headers = [];
+
     private array $payload = [];
+
+    private array $query   = [];
+
+    private string $baseUrl = '';
+
+    private Mapper $mapper;
 
     private array $routePayload = [];
 
     public function __construct(
         private string $url,
-        private string $verb
+        private string $method
     )
     {
     }
 
-    #[Pure] public static function get(string $url)
+    #[Pure] public static function get(string $url, Mapper $mapper)
     {
-        return new self($url, 'GET');
+        return self::makeInstance($url, 'GET', $mapper);
     }
 
-    #[Pure] public static function post(string $url): Route
+    #[Pure] public static function post(string $url, Mapper $mapper): Route
     {
-        return new self($url, 'POST');
+        return self::makeInstance($url, 'POST', $mapper);
     }
 
-    #[Pure] public static function put(string $url): Route
+    #[Pure] public static function put(string $url, Mapper $mapper): Route
     {
-        return new self($url, 'PUT');
+        return self::makeInstance($url, 'PUT', $mapper);
     }
 
-    #[Pure] public static function delete(string $url): Route
+    #[Pure] public static function delete(string $url, Mapper $mapper): Route
     {
-        return new self($url, 'DELETE');
+        return self::makeInstance($url, 'DELETE', $mapper);
+    }
+
+    #[Pure] private static function makeInstance($url, $method, Mapper $mapper): Route
+    {
+        $routeInstance = new self($url, $method);
+        $routeInstance->mapper = $mapper;
+        return $routeInstance;
+    }
+
+    public function getMapper(): Mapper
+    {
+        return $this->mapper;
+    }
+
+    public function setBaseUrl(string $baseUrl): self
+    {
+        $this->baseUrl = $baseUrl;
+        return $this;
+    }
+
+    public function addParam(array $param): self
+    {
+        $this->params = array_merge($this->params, $param);
+        return $this;
+    }
+
+    public function getParams(): array
+    {
+        return $this->params;
+    }
+
+    public function fillParams(): self
+    {
+        foreach ($this->params as $key => $param) {
+            $this->url = $this->replace($key, $param, $this->url);
+            $this->setHeaderParams([$key => $param]);
+            $this->setPayloadParams([$key => $param]);
+            $this->setQueryParams([$key => $param]);
+        }
+        return $this;
     }
 
     public function withHeader(array $header): self
@@ -50,46 +99,92 @@ class Route
 
     public function withPayload(mixed $payload): self
     {
-        $this->payload = $payload;
+        $this->addPayload($payload);
         return $this;
     }
 
-    public function params(array $params): void
+    private function addPayload(array $payload)
     {
-        foreach ($params as $key => $param)
-            $this->url = str_replace('{'.$key.'}', $param, $this->url);
+        $this->payload = array_merge($this->payload, $payload);
     }
 
-    public function headerParams(array $params): void
+    public function withQuery(array $query): self
     {
-        foreach ($params as $key => $param)
-            foreach ($this->getFullHeader() as $headerkey => $headerValue)
-                $this->addHeader([$headerkey => str_replace('{'.$key.'}', $param, $headerValue)]);
+        $this->addQuery($query);
+        return $this;
     }
 
-    public function getUrl(): string
+    private function addQuery(array $query)
+    {
+        $this->query = array_merge($this->query, $query);
+    }
+
+    private function setHeaderParams(array $params)
+    {
+        foreach ($params as $key => $value)
+            $this->headers = $this->replaceArray($key, $value, $this->headers);
+    }
+
+    private function setPayloadParams(array $params)
+    {
+        foreach ($params as $key => $value)
+            $this->payload = $this->replaceArray($key, $value, $this->payload);
+    }
+
+    private function setQueryParams(array $params)
+    {
+        foreach ($params as $key => $value)
+            $this->query = $this->replaceArray($key, $value, $this->query);
+    }
+
+    private function replace($find, $replaceWith, $searchIn): array|string
+    {
+        return str_replace('{'.$find.'}', $replaceWith, $searchIn);
+    }
+
+    private function replaceArray($find, $replaceWith, $searchIn): array
+    {
+        $temp = [];
+        foreach ($searchIn as $key => $value) {
+            if (is_array($value)) {
+                $temp[$key] = $this->replaceArray($find, $replaceWith, $value);
+            }else {
+                $temp[$key] = $this->replace($find, $replaceWith, $value);
+            }
+        }
+        return $temp;
+    }
+
+    public function getPathUrl(): string
     {
         return $this->url;
     }
 
-    public function visit(array $params = null): string
+    #[Pure] public function getFullUrl(): string
     {
-        $fullHeaders = $this->getFullHeader();
-        //print_r($fullHeaders);
-        //print_r($this->payload);
-        if ($params) {
-            $this->params($params);
-            $this->headerParams($params);
-        }
-        return $this->load($this->verb, $this->url, $fullHeaders, $this->payload);
+        return $this->baseUrl.$this->getPathUrl();
+    }
+
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function visit(): string
+    {
+        //print_r($this->getFullQuery());
+        $this->fillParams();
+        $response = $this->load(
+            $this->method,
+            $this->getFullUrl(),
+            $this->getFullHeader(),
+            $this->getFullPayload(),
+            $this->getFullQuery()
+        );
+        return $response->getBody()->getContents();
     }
 
     private function addHeader(array $header): void
     {
-        foreach ($header as $key=>$value) {
-            $this->headers[$key] = $value;
-        }
-        //$this->headers = array_merge($this->headers, $header);
+        $this->headers = array_merge($this->headers, $header);
     }
 
     public function getFullHeader(): array
@@ -97,9 +192,16 @@ class Route
         return $this->headers;
     }
 
-    public function getPayload(): array
+    public function getFullPayload(): array
     {
-        return $this->routePayload;
+        return $this->payload;
     }
+
+    public function getFullQuery(): array
+    {
+        return $this->query;
+    }
+
+
 
 }
