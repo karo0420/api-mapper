@@ -40,17 +40,25 @@ abstract class Mapper
                 }
             }
 
-        }else
+        }else {
             foreach ($productsArray as $product)
                 $productGroup->addItem($this->syncProductKeys($product, new Item(), $this->neededKeys()));
+        }
         return $productGroup;
     }
 
-    private function syncProductKeys(array $productArray, $productObj, array $neededKeys): Item
+    private function syncProductKeys(mixed $productArray, $productObj, array $neededKeys): Item
     {
+        if (! empty($productArray) && empty($neededKeys))
+            $neededKeys = ['mapper_item'];
         foreach ($neededKeys as $key => $value) {
             $searchKey = is_numeric($key) ? $value : $key;
-            $data = $productArray[$searchKey]??null;
+            if ($searchKey !== 'mapper_item')
+                $data = $productArray[$searchKey]??null;
+            else {
+                $data = $productArray;
+                $value = $key;
+            }
             if (is_array($value)) {
                 $data = $this->syncProductKeys($data, new Item(), $value);
                 $value = $key;

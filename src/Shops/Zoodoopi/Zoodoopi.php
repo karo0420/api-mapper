@@ -19,7 +19,7 @@ class Zoodoopi extends BaseMap
                 'detail' => Route::get('/products/{detail}', new ProductMapper())
             ],
             'categories' => [
-                'list'     => Route::get('/products/categories', new CategoryMapper()),
+                'list'     => Route::get('/products/categories', CategoryMapper::collection()),
                 'products' => Route::get('/products/category/{categories}', ProductMapper::collection())
             ],
             'test' => [
