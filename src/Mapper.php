@@ -21,6 +21,7 @@ abstract class Mapper
         $productArray = $this->convertToArray($productData);
         if (! $productArray)
             return null;
+
         if ($this->isCollection) {
             $result = $this->parseCollection($productArray);
         }else {
