@@ -23,4 +23,9 @@ class ProductMapper extends Mapper
     {
         return [];
     }
+
+    protected function dataWrappedIn(): string
+    {
+        return '';
+    }
 }

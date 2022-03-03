@@ -23,4 +23,9 @@ class PostMapper extends Mapper
 
         ];
     }
+
+    protected function dataWrappedIn(): string
+    {
+        return '';
+    }
 }

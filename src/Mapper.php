@@ -25,6 +25,8 @@ abstract class Mapper
         if ($this->isCollection) {
             $result = $this->parseCollection($productArray);
         }else {
+            if ($this->dataWrappedIn())
+                $productArray = $productArray[$this->dataWrappedIn()];
             $result = $this->syncProductKeys($productArray, new Item(), $this->neededKeys());
         }
         return $result;
@@ -32,7 +34,44 @@ abstract class Mapper
 
     public function parseCollection(array $productData)
     {
-        //print_r($productData);
+        $wrappedIn = $this->dataWrappedIn();
+        $dataBackup = $productData;
+        unset($productData[$wrappedIn]);
+        $products = null;
+        $meta = null;
+
+
+
+        if (! $this->collectionNeededKeys() && ! $wrappedIn) {
+            $products = $dataBackup;
+            $wrappedIn = 'data';
+        }elseif (! $this->collectionNeededKeys() && $wrappedIn) {
+            // use product[data]
+            $products = $dataBackup[$wrappedIn];
+        }elseif($this->collectionNeededKeys() && ! $wrappedIn) {
+            //meta
+            $meta = $this->syncProductKeys($productData, new Item(), $this->collectionNeededKeys());
+        }else {
+            $meta = $this->syncProductKeys($productData, new Item(), $this->collectionNeededKeys());
+            $products = $dataBackup[$wrappedIn];
+        }
+
+        $parsed = new ItemGroup();
+
+        if ($products) {
+            $productGroup = new ItemGroup();
+            foreach ($products as $key => $product)
+                $productGroup->addItem($this->syncProductKeys($product, new Item(), $this->neededKeys()));
+        }
+
+
+        if (isset($productGroup))
+            $parsed->addItem($productGroup, $wrappedIn);
+        if ($meta)
+            $parsed->addItem($meta, 'meta');
+        return $parsed;
+
+        /*//print_r($productData);
         $productsArray = $productData;
         $productGroup = new ItemGroup();
 
@@ -47,7 +86,7 @@ abstract class Mapper
             foreach ($productsArray as $product)
                 $productGroup->addItem($this->syncProductKeys($product, new Item(), $this->neededKeys()));
         }
-        return $productGroup;
+        return $productGroup;*/
     }
 
     private function syncProductKeys(mixed $productArray, $productObj, array $neededKeys): Item
@@ -78,6 +117,7 @@ abstract class Mapper
 
     abstract protected function neededKeys(): array;
     abstract protected function collectionNeededKeys(): array;
+    abstract protected function dataWrappedIn(): string;
 
 
 }

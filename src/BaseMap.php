@@ -32,5 +32,10 @@ abstract class BaseMap
         return $this->loader->$name($arguments[0]??null);
     }
 
+    public function __get(string $name)
+    {
+        return $this->loader->$name;
+    }
+
 
 }

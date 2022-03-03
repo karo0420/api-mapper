@@ -22,4 +22,9 @@ class PhotoMapper extends Mapper
     {
         return [];
     }
+
+    protected function dataWrappedIn(): string
+    {
+        return '';
+    }
 }

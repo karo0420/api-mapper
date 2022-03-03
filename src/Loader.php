@@ -52,6 +52,12 @@ class Loader
         return clone $this;
     }
 
+    public function __get(string $name)
+    {
+        $this->mapRoutes = $this->mapRoutes[$name];
+            return $this;
+    }
+
     /**
      * @throws VisitNonRouteInstance
      */

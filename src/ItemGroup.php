@@ -6,9 +6,12 @@ class ItemGroup implements ItemInterface
 {
     private array $items = [];
 
-    public function addItem(ItemInterface $item)
+    public function addItem(ItemInterface $item, string $keyName = null)
     {
-        array_push($this->items, $item);
+        if ($keyName)
+            $this->items[$keyName] = $item;
+        else
+            array_push($this->items, $item);
     }
 
     public function toArray(): array
@@ -29,5 +32,10 @@ class ItemGroup implements ItemInterface
     public function getItems(): array
     {
         return $this->items;
+    }
+
+    public function __get(string $name)
+    {
+        return $this->items[$name];
     }
 }

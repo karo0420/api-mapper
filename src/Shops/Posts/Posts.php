@@ -24,10 +24,12 @@ class Posts extends BaseMap
     {
         return [
             'posts' => [
-                'all'      => Route::get('/posts', PostMapper::collection())
-                    ->withQuery([
-                        'userId' => '{user}'
-                    ])
+                'user' => [
+                    'all' => Route::get('/posts', PostMapper::collection())
+                        ->withQuery([
+                            'userId' => '{user}'
+                        ])
+                ]
                 ,
                 'detail'   => Route::get('/posts/{detail}', new PostMapper()),
                 'comments' => Route::get('/posts/{posts}/comments', CommentMapper::collection()),
