@@ -24,7 +24,7 @@ class PostMapper extends Mapper
         ];
     }
 
-    protected function dataWrappedIn(): string
+    protected function dataWrappedIn(): array|string
     {
         return '';
     }

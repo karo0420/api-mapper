@@ -34,12 +34,20 @@ abstract class Mapper
 
     public function parseCollection(array $productData)
     {
-        $wrappedIn = $this->dataWrappedIn();
+		$wrapTo = 'data';
+		if (is_array($this->dataWrappedIn())) {
+			$wrapkeys = array_keys($this->dataWrappedIn());
+        	$wrappedIn = is_numeric($wrapkeys[0])?$this->dataWrappedIn()[0]:$wrapkeys[0];
+			$wrapTo    = $this->dataWrappedIn()[$wrapkeys[0]]?$this->dataWrappedIn()[$wrapkeys[0]]:'data';
+		}else {
+			$wrappedIn = $this->dataWrappedIn();
+		}
+        
+
         $dataBackup = $productData;
         unset($productData[$wrappedIn]);
         $products = null;
         $meta = null;
-
 
 
         if (! $this->collectionNeededKeys() && ! $wrappedIn) {
@@ -64,9 +72,8 @@ abstract class Mapper
                 $productGroup->addItem($this->syncProductKeys($product, new Item(), $this->neededKeys()));
         }
 
-
-        if (isset($productGroup))
-            $parsed->addItem($productGroup, $wrappedIn);
+		if (isset($productGroup))
+            $parsed->addItem($productGroup, $wrapTo);
         if ($meta)
             $parsed->addItem($meta, 'meta');
         return $parsed;
@@ -117,7 +124,7 @@ abstract class Mapper
 
     abstract protected function neededKeys(): array;
     abstract protected function collectionNeededKeys(): array;
-    abstract protected function dataWrappedIn(): string;
+    abstract protected function dataWrappedIn(): array|string;
 
 
 }

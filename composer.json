@@ -5,7 +5,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Karo0420\\ApiMapper\\": "src"
+            "Karo0420\\ApiMapper\\": "src",
+            "Test\\": "tests"
         }
     },
     "authors": [
@@ -16,5 +17,8 @@
     ],
     "require": {
         "guzzlehttp/guzzle": "^7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
     }
 }
