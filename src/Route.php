@@ -24,11 +24,14 @@ class Route
 
     private array $routePayload = [];
 
+    private string $OriginalUrl = '';
+
     public function __construct(
         private string $url,
         private string $method
     )
     {
+      $this->OriginalUrl = $url;
     }
 
     #[Pure] public static function get(string $url, Mapper $mapper)
@@ -78,6 +81,12 @@ class Route
     public function getParams(): array
     {
         return $this->params;
+    }
+
+    public function reset()
+    {
+        $this->params = [];
+        $this->url = $this->OriginalUrl;
     }
 
     public function fillParams(): self
