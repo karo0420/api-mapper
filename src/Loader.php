@@ -74,6 +74,7 @@ class Loader
                 'map_id'   => $this->map->mapId
             ]);
         }
+        $this->mapRoutes = $this->map->preparedRoutes;
         return $parsed;
     }
 
