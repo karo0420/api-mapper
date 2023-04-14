@@ -67,6 +67,8 @@ class Loader
             throw new VisitNonRouteInstance('Trying to visit non-route instance , This route has sub routes');
         $mapperModel = $mapper!=null?$mapper:$this->mapRoutes->getMapper();
         $route = $this->mapRoutes->setBaseUrl($this->map->baseUrl());
+        $route->withHeader($this->map->getHeaders());
+        $route->addParam($this->map->getParams());
         //print_r($route->getParams());
         if ($parsed = $mapperModel->parse($route->visit())) {
             $parsed->additional([

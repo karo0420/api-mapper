@@ -13,6 +13,8 @@ abstract class BaseMap
     protected array $headers = [];
     public array $preparedRoutes = [];
 
+    private array $params = [];
+
     abstract public function baseUrl(): string;
     abstract protected function routes(): array;
 
@@ -25,6 +27,17 @@ abstract class BaseMap
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    public function initParams(array $params)
+    {
+        $this->params = $params;
+        return $this;
+    }
+
+    public function getParams()
+    {
+        return $this->params;
     }
 
     public function __call(string $name, array $arguments)
